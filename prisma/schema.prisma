@@ -1,0 +1,33 @@
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator zod {
+  provider              = "zod-prisma-types"
+  output                = "../src/generated/zod"
+  createInputTypes      = false
+  useMultipleFiles      = false
+  writeBarrelFiles      = true
+}
+
+model User {
+  /// @zod.custom.use(z.string().uuid().describe("Unique user identifier"))
+  id        String   @id @default(uuid())
+
+  /// @zod.custom.use(z.string().email({ message: "Invalid email format" }).describe("Primary email address"))
+  email     String   @unique
+
+  /// @zod.custom.use(z.string().min(2, "Name too short").max(50).describe("Full display name"))
+  name      String
+
+  /// @zod.custom.use(z.string().min(8, "Password must be at least 8 chars"))
+  password  String
+
+  /// @zod.custom.use(z.date().describe("Account creation timestamp"))
+  createdAt DateTime @default(now())
+}
